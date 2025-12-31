@@ -1,0 +1,74 @@
+﻿@using CashFlow.Domain.Enums;
+@inject ICashTransactionService _transactionService
+@inject ISnackbar _snackBar
+<MudDialog>
+    <DialogContent>
+        <MudGrid>
+            <MudItem xs="12" sm="7">
+                <MudPaper Class="pa-4">
+                    <MudForm @ref="_transactionForm" Model="_createCashTransaction" @bind-IsValid="@success" @bind-Errors="@errors">
+                        <MudTextField T="string" @bind-Value="@_createCashTransaction.Name" Label="Name" Required="true" RequiredError="Name is required" />
+                        <MudTextField T="decimal" @bind-Value="@_createCashTransaction.Amount" Label="Amount" Required="true" RequiredError="Amount is required" />
+                        <MudSelect @bind-Value="@_createCashTransaction.Type" Label="Transaction Type">
+                            @foreach (TransactionType transactionType in Enum.GetValues(typeof(TransactionType)))
+                            {
+                                <MudSelectItem Value="@transactionType">@transactionType</MudSelectItem>
+                            }
+                        </MudSelect>
+                        <MudTextField T="string" Label="Description" Variant="Variant.Outlined" @bind-Value="@_createCashTransaction.Description" Lines="6" />
+                    </MudForm>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" sm="5">
+                <MudPaper Class="pa-4 mud-height-full">
+                    <MudText Typo="Typo.subtitle2">@($"Errors ({errors.Length})")</MudText>
+                    @foreach (var error in errors)
+                    {
+                        <MudText Color="@Color.Error">@error</MudText>
+                    }
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Submit</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code 
+{
+    private bool success;
+    private string[] errors = { };
+    private MudForm _transactionForm;
+
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private CreateCashTransactionDto _createCashTransaction = new();
+
+    private async Task Submit()
+    {
+        await _transactionForm.Validate();
+
+        if (!_transactionForm.IsValid)
+            return;
+
+        var result = await _transactionService.AddCashTransaction(_createCashTransaction);
+
+        _snackBar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
+
+        if (!result.IsSuccess){
+            _snackBar.Add(result.ErrorMessage, Severity.Error);
+            return;
+        }
+        
+        _snackBar.Add("Transaction successfully added.", Severity.Success);
+
+        MudDialog.Close(true);
+    }
+
+
+}

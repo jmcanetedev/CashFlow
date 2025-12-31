@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="CashFlow.Application/CashFlow.Application.csproj" />
+  <Project Path="CashFlow.Domain/CashFlow.Domain.csproj" />
+  <Project Path="CashFlow.Infrastructure/CashFlow.Infrastructure.csproj" />
+  <Project Path="CashFlow.UnitTests/CashFlow.UnitTests.csproj" />
+  <Project Path="CashFlow.Web/CashFlow.Web.csproj" />
+</Solution>

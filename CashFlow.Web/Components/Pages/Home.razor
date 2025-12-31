@@ -1,0 +1,191 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@using CashFlow.Web.Formatting
+@inject ICashTransactionService _transactionService
+
+@if (_isLoading)
+{
+    <MudPaper Class="pa-4 mb-4">
+        <MudProgressCircular Size="Size.Large" Indeterminate="true" Color="Color.Primary">
+            <ChildContent>Loading Chart Information</ChildContent>
+        </MudProgressCircular>
+    </MudPaper>
+}
+else
+{
+    <MudPaper Class="pa-4 mb-4">
+        <MudDateRangePicker @bind-DateRange="_range" PickerClosed="LoadReport" />
+    </MudPaper>
+    <MudPaper Elevation="1" Class="pa-4">
+        <MudText Typo="Typo.h6">Cash Flow Breakdown</MudText>
+
+        <MudChart ChartType="ChartType.Pie"
+                  InputLabels="_labels"
+                  InputData="_data"
+                  Height="300px" />
+
+        <MudDivider Class="my-2" />
+
+        @foreach (var item in _summary)
+        {
+            <MudText>
+                @item.Type: @CurrencyFormatter.ToPhp(item.TotalAmount)
+            </MudText>
+        }
+    </MudPaper>
+    <MudPaper Elevation="1" Class="pa-4 mt-3">
+        <MudText Typo="Typo.h5" Class="mb-2">
+            Income – Expense Report
+        </MudText>
+
+        @if (_report is not null)
+        {
+            <MudPaper Class="pa-4 mb-4">
+                <MudText Typo="Typo.h6" Color="Color.Success">
+                    Income
+                </MudText>
+
+                <MudTable Items="_report.Incomes" Dense="true">
+                    <HeaderContent>
+                        <MudTh>Date</MudTh>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Amount</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.TransactionDate.ToShortDateString()</MudTd>
+                        <MudTd>@context.Name</MudTd>
+                        <MudTd>
+                            @CurrencyFormatter.ToPhp(context.Amount)
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+
+                <MudText Align="Align.Right" Class="mt-2">
+                    <strong>Total Income:</strong>
+                    @CurrencyFormatter.ToPhp(_report.TotalIncome)
+                </MudText>
+            </MudPaper>
+
+            <MudPaper Class="pa-4 mb-4">
+                <MudText Typo="Typo.h6" Color="Color.Error">
+                    Expenses
+                </MudText>
+
+                <MudTable Items="_report.Expenses" Dense="true">
+                    <HeaderContent>
+                        <MudTh>Date</MudTh>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Amount</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.TransactionDate.ToShortDateString()</MudTd>
+                        <MudTd>@context.Name</MudTd>
+                        <MudTd>
+                            @CurrencyFormatter.ToPhp(context.Amount)
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+
+                <MudText Align="Align.Right" Class="mt-2">
+                    <strong>Total Expense:</strong>
+                    @CurrencyFormatter.ToPhp(_report.TotalExpenses)
+                </MudText>
+            </MudPaper>
+
+            <MudPaper Class="pa-4">
+                <MudText Typo="Typo.h6">
+                    Net Remaining Income
+                </MudText>
+
+                <MudText Typo="Typo.h5"
+                         Color="@(_report.Net >= 0 ? Color.Success : Color.Error)">
+                    @CurrencyFormatter.ToPhp(_report.Net)
+                </MudText>
+            </MudPaper>
+        }
+    </MudPaper>
+    <MudPaper Elevation="1" Class="pa-4 mt-3">
+        <MudText Typo="Typo.h5" Class="mb-2">
+            Savings -  Report
+        </MudText>
+
+        @if (_savingReport is not null)
+        {
+            <MudPaper Class="pa-4 mb-4">
+                <MudText Typo="Typo.h6" Color="Color.Success">
+                    Savings
+                </MudText>
+
+                <MudTable Items="_savingReport.Savings" Dense="true">
+                    <HeaderContent>
+                        <MudTh>Date</MudTh>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Amount</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.TransactionDate.ToShortDateString()</MudTd>
+                        <MudTd>@context.Name</MudTd>
+                        <MudTd>
+                            @CurrencyFormatter.ToPhp(context.Amount)
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+
+                <MudText Align="Align.Right" Class="mt-2">
+                    <strong>Total Income:</strong>
+                    @CurrencyFormatter.ToPhp(_savingReport.TotalSavings)
+                </MudText>
+            </MudPaper>
+        }
+    </MudPaper>
+}
+@code
+{
+    private IReadOnlyList<CashFlowSliceDto> _summary = [];
+    private string[] _labels = [];
+    private double[] _data = [];
+    private IncomeExpenseReportDto _report;
+    private SavingReportDto _savingReport;
+
+    private DateRange _range = new(
+       DateTime.Today.AddMonths(-1),
+       DateTime.Today);
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadReport();
+    }
+    private async Task LoadPieData()
+    {
+        var result = await _transactionService.GetCashTransactionByRange(new CashFlowFilterDto { StartDate = _range.Start.GetValueOrDefault(), EndDate = _range.End.GetValueOrDefault() });
+
+        if (result.IsSuccess)
+        {
+            _labels = result.Data.Select(s => s.Type.ToString()).ToArray();
+            _data = result.Data.Select(s => (double)s.TotalAmount).ToArray();
+        }
+    }
+    private async Task LoadSavingReport()
+    {
+        var result = await _transactionService.GetSavingReport(new CashFlowFilterDto { StartDate = _range.Start.GetValueOrDefault(), EndDate = _range.End.GetValueOrDefault() });
+        if (!result.IsSuccess)
+            return;
+
+        _savingReport = result.Data;
+    }
+
+    private async Task LoadReport()
+    {
+        _isLoading = true;
+        var result = await _transactionService.GetIncomeExpenseReport(new CashFlowFilterDto { StartDate = _range.Start.GetValueOrDefault(), EndDate = _range.End.GetValueOrDefault() });
+        if (!result.IsSuccess)
+            return;
+
+        _report = result.Data;
+
+        await LoadPieData();
+        await LoadSavingReport();
+        _isLoading = false;
+    }
+}
