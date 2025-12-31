@@ -1,6 +1,7 @@
 ﻿@using CashFlow.Domain.Enums;
+@using CashFlow.Web.Interfaces
 @inject ICashTransactionService _transactionService
-@inject ISnackbar _snackBar
+@inject INotificationService _notificationService
 <MudDialog>
     <DialogContent>
         <MudGrid>
@@ -64,8 +65,7 @@
 
         if(!result.IsSuccess)
         {
-            _snackBar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
-            _snackBar.Add(result.ErrorMessage, Severity.Error);
+            _notificationService.Error(result.ErrorMessage);
             MudDialog.Cancel();
             return;
         }
@@ -91,15 +91,14 @@
 
         var result = await _transactionService.UpdateCashTransaction(updateCashTransaction);
 
-        _snackBar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
 
         if (!result.IsSuccess)
         {
-            _snackBar.Add(result.ErrorMessage, Severity.Error);
+            _notificationService.Error(result.ErrorMessage);
             return;
         }
 
-        _snackBar.Add("Transaction successfully updated.", Severity.Success);
+        _notificationService.Success("Transaction successfully updated.");
 
         MudDialog.Close(true);
     }

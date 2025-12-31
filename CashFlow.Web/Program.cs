@@ -1,5 +1,6 @@
 using CashFlow.Application;
 using CashFlow.Infrastructure;
+using CashFlow.Web;
 using CashFlow.Web.Components;
 using MudBlazor.Services;
 
@@ -14,6 +15,7 @@ builder.Services.AddMudServices();
 // Add custom services
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
+builder.Services.AddNotificationService();
 
 var app = builder.Build();
 

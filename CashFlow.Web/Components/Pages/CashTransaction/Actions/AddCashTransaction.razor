@@ -1,6 +1,7 @@
 ﻿@using CashFlow.Domain.Enums;
+@using CashFlow.Web.Interfaces
 @inject ICashTransactionService _transactionService
-@inject ISnackbar _snackBar
+@inject INotificationService _notificationService
 <MudDialog>
     <DialogContent>
         <MudGrid>
@@ -58,14 +59,12 @@
 
         var result = await _transactionService.AddCashTransaction(_createCashTransaction);
 
-        _snackBar.Configuration.PositionClass = Defaults.Classes.Position.TopRight;
-
         if (!result.IsSuccess){
-            _snackBar.Add(result.ErrorMessage, Severity.Error);
+            _notificationService.Error(result.ErrorMessage);
             return;
         }
-        
-        _snackBar.Add("Transaction successfully added.", Severity.Success);
+
+        _notificationService.Success("Transaction successfully added.");
 
         MudDialog.Close(true);
     }
