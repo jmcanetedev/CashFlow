@@ -70,7 +70,10 @@ internal class CashTransactionService : ICashTransactionService
 
     public async Task<Result<IReadOnlyList<CashFlowSliceDto>>> GetCashTransactionByRange(CashFlowFilterDto filter)
     {
-        var transactions = await _repository.GetCashTransactionByRange(filter.StartDate, filter.EndDate);
+        var from = filter.StartDate.Date;
+        var to = filter.EndDate.Date.AddDays(1);
+
+        var transactions = await _repository.GetCashTransactionByRange(from, to);
 
         var groupedTransactions = transactions.GroupBy(transactions => transactions.Type)
             .Select(group => new CashFlowSliceDto
@@ -85,7 +88,10 @@ internal class CashTransactionService : ICashTransactionService
 
     public async Task<Result<IncomeExpenseReportDto>> GetIncomeExpenseReport(CashFlowFilterDto filter)
     {
-        var transactions = await _repository.GetCashTransactionByRange(filter.StartDate, filter.EndDate);
+        var from = filter.StartDate.Date;
+        var to = filter.EndDate.Date.AddDays(1);
+
+        var transactions = await _repository.GetCashTransactionByRange(from, to);
 
         var incomes = transactions
             .Where(x => x.Type == TransactionType.Income)
@@ -115,7 +121,10 @@ internal class CashTransactionService : ICashTransactionService
 
     public async Task<Result<SavingReportDto>> GetSavingReport(CashFlowFilterDto filter)
     {
-        var transactions = await _repository.GetCashTransactionByRange(filter.StartDate, filter.EndDate);
+        var from = filter.StartDate.Date;
+        var to = filter.EndDate.Date.AddDays(1);
+
+        var transactions = await _repository.GetCashTransactionByRange(from, to);
 
         var savings = transactions
             .Where(x => x.Type == TransactionType.Saving)

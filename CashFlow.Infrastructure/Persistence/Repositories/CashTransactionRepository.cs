@@ -45,12 +45,11 @@ public class CashTransactionRepository : ICashTransactionRepository
 
     public async Task<IReadOnlyList<CashTransaction>> GetCashTransactionByRange(DateTime start, DateTime end)
     {
-        var from = start.Date;
-        var to = end.Date.AddDays(1);
+       
 
         var transactions =  await _context.Transactions
             .AsNoTracking()
-            .Where(t => t.TransactionDate >= from && t.TransactionDate < to).OrderByDescending(c => c.Id)
+            .Where(t => t.TransactionDate >= start && t.TransactionDate < end).OrderByDescending(c => c.Id)
             .ToListAsync();
 
         return transactions;
