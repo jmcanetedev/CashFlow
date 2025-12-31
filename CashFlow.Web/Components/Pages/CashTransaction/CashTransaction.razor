@@ -26,6 +26,11 @@
                 @CurrencyFormatter.ToPhp(item.Item.Amount)
             </CellTemplate>
         </PropertyColumn>
+        <TemplateColumn  StickyRight="true">
+            <CellTemplate Context="item">
+                <MudIconButton Icon="@Icons.Material.Outlined.Edit" Size="@Size.Small" OnClick="()=> OpenEditDialog(item.Item)" />
+            </CellTemplate>
+        </TemplateColumn>
     </Columns>
     <PagerContent>
         <MudDataGridPager T="GetCashTransactionDto" />
@@ -56,7 +61,24 @@
         if (result.Canceled)
             return;
 
-       await OnInitializedAsync();
+        await OnInitializedAsync();
 
+    }
+    private async Task OpenEditDialog(GetCashTransactionDto transactionDto)
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true, MaxWidth = MaxWidth.Large };
+        var dialogParameter = new DialogParameters
+        {
+            ["Id"] = transactionDto.Id    
+        };
+
+        var transactionDialog = await DialogService.ShowAsync<EditCashTransaction>("Edit Cash Transaction", dialogParameter, options);
+
+        var result = await transactionDialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        await OnInitializedAsync();
     }
 }
