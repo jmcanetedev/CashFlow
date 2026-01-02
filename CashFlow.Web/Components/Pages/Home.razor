@@ -1,8 +1,10 @@
 ﻿@page "/"
 @rendermode InteractiveServer
 @using CashFlow.Web.Formatting
+@using CashFlow.Web.Security
 @inject ICashTransactionService _transactionService
 @inject AuthenticationStateProvider AuthState
+@inject ICurrentUser CurrentUser
 @attribute [Authorize]
 @if (_isLoading)
 {
@@ -155,10 +157,6 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var state = await AuthState.GetAuthenticationStateAsync();
-
-        Console.WriteLine($"Authenticated: {state.User.Identity?.IsAuthenticated}");
-
         await LoadReport();
     }
     private async Task LoadPieData()

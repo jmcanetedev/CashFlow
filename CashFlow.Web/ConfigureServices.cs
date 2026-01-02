@@ -1,6 +1,7 @@
 ﻿using CashFlow.Infrastructure.Identity;
 using CashFlow.Infrastructure.Persistence;
 using CashFlow.Web.Interfaces;
+using CashFlow.Web.Security;
 using CashFlow.Web.Services;
 using Microsoft.AspNetCore.Identity;
 
@@ -24,6 +25,8 @@ public static class ConfigureServices
         })
         .AddEntityFrameworkStores<AppDbContext>()
         .AddDefaultTokenProviders();
+        
+        services.AddScoped<ICurrentUser, CurrentUser>();
 
         services.ConfigureApplicationCookie(options =>
         {
