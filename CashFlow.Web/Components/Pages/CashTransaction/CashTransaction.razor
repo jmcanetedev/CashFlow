@@ -5,7 +5,7 @@
 @rendermode InteractiveServer
 @inject ICashTransactionService _transactionService
 @inject IDialogService DialogService
-
+@attribute [Authorize]
 <h3>Transactions</h3>
 <h6><i>List of Transactions Incoming/Expense</i></h6>
 <MudButton OnClick="OpenAddDialog" Variant="Variant.Filled" Color="Color.Success" Class="mb-2" Size="Size.Medium" StartIcon="@Icons.Material.Filled.Add">Add Transaction</MudButton>

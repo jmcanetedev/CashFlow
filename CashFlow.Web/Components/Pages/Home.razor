@@ -2,7 +2,8 @@
 @rendermode InteractiveServer
 @using CashFlow.Web.Formatting
 @inject ICashTransactionService _transactionService
-
+@inject AuthenticationStateProvider AuthState
+@attribute [Authorize]
 @if (_isLoading)
 {
     <MudPaper Class="pa-4 mb-4">
@@ -154,6 +155,10 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        var state = await AuthState.GetAuthenticationStateAsync();
+
+        Console.WriteLine($"Authenticated: {state.User.Identity?.IsAuthenticated}");
+
         await LoadReport();
     }
     private async Task LoadPieData()
