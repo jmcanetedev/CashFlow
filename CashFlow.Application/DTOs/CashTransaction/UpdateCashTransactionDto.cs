@@ -5,6 +5,7 @@ namespace CashFlow.Application.DTOs.CashTransaction;
 public sealed class UpdateCashTransactionDto
 {
     public long Id { get; set; }
+    public long AccountId { get; set; }
     public decimal Amount { get; set; }
     public TransactionType Type { get; set; }
     public string Description { get; set; } = string.Empty;

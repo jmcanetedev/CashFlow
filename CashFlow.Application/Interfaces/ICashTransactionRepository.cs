@@ -6,10 +6,10 @@ namespace CashFlow.Application.Interfaces;
 
 public interface ICashTransactionRepository
 {
-    Task<CashTransaction> AddCashTransaction(CashTransaction cashTransaction);
-    Task<CashTransaction> UpdateCashTransaction(CashTransaction cashTransaction);
-    Task<bool> DeleteCashTransaction(long id);
-    Task<CashTransaction> GetCashTransactionById(long id);
-    Task<IReadOnlyList<CashTransaction>> GetAllCashTransactions();
-    Task<IReadOnlyList<CashTransaction>> GetCashTransactionByRange(DateTime start, DateTime end);
+    Task<CashTransaction> AddCashTransactionAsync(CashTransaction cashTransaction);
+    Task<CashTransaction> UpdateCashTransactionAsync(CashTransaction cashTransaction);
+    Task<bool> DeleteCashTransactionAsync(long id);
+    Task<CashTransaction> GetCashTransactionByIdAsync(long id);
+    Task<IReadOnlyList<CashTransaction>> GetAllCashTransactionsAsync();
+    Task<IReadOnlyList<CashTransaction>> GetCashTransactionByRangeAsync(DateTime start, DateTime end);
 }

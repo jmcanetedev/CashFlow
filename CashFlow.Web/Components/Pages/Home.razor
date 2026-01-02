@@ -158,7 +158,7 @@ else
     }
     private async Task LoadPieData()
     {
-        var result = await _transactionService.GetCashTransactionByRange(new CashFlowFilterDto { StartDate = _range.Start.GetValueOrDefault(), EndDate = _range.End.GetValueOrDefault() });
+        var result = await _transactionService.GetCashTransactionByRangeAsync(new CashFlowFilterDto { StartDate = _range.Start.GetValueOrDefault(), EndDate = _range.End.GetValueOrDefault() });
 
         if (result.IsSuccess)
         {
@@ -168,7 +168,7 @@ else
     }
     private async Task LoadSavingReport()
     {
-        var result = await _transactionService.GetSavingReport(new CashFlowFilterDto { StartDate = _range.Start.GetValueOrDefault(), EndDate = _range.End.GetValueOrDefault() });
+        var result = await _transactionService.GetSavingReportAsync(new CashFlowFilterDto { StartDate = _range.Start.GetValueOrDefault(), EndDate = _range.End.GetValueOrDefault() });
         if (!result.IsSuccess)
             return;
 
@@ -178,7 +178,7 @@ else
     private async Task LoadReport()
     {
         _isLoading = true;
-        var result = await _transactionService.GetIncomeExpenseReport(new CashFlowFilterDto { StartDate = _range.Start.GetValueOrDefault(), EndDate = _range.End.GetValueOrDefault() });
+        var result = await _transactionService.GetIncomeExpenseReportAsync(new CashFlowFilterDto { StartDate = _range.Start.GetValueOrDefault(), EndDate = _range.End.GetValueOrDefault() });
         if (!result.IsSuccess)
             return;
 

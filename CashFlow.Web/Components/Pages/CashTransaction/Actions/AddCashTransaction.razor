@@ -57,7 +57,7 @@
         if (!_transactionForm.IsValid)
             return;
 
-        var result = await _transactionService.AddCashTransaction(_createCashTransaction);
+        var result = await _transactionService.AddCashTransactionAsync(_createCashTransaction);
 
         if (!result.IsSuccess){
             _notificationService.Error(result.ErrorMessage);

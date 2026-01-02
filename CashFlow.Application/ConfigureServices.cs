@@ -1,5 +1,7 @@
 ﻿using CashFlow.Application.Interfaces;
+using CashFlow.Application.Mappings.Account;
 using CashFlow.Application.Mappings.CashTransaction;
+using CashFlow.Application.Services.Account;
 using CashFlow.Application.Services.CashTransaction;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,10 +11,12 @@ public static class ConfigureServices
 {
     public static void AddApplication(this IServiceCollection services)
     {
+        services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<ICashTransactionService, CashTransactionService>();
         services.AddAutoMapper(opt=>
         {
             opt.AddMaps(typeof(CashTransactionProfile).Assembly);
+            opt.AddMaps(typeof(AccountProfile).Assembly);
         });
     }
 }

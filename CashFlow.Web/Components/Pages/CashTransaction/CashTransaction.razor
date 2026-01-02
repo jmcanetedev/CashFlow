@@ -43,7 +43,7 @@
     protected override async Task OnInitializedAsync()
     {
         _loading = true;
-        var _transactionResult = await _transactionService.GetAllCashTransactions();
+        var _transactionResult = await _transactionService.GetAllCashTransactionsAsync();
         if (_transactionResult.IsSuccess && _transactionResult.Data is not null)
         {
             _transactions = _transactionResult.Data;

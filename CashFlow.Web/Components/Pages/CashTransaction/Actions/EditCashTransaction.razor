@@ -33,7 +33,7 @@
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Primary" OnClick="Submit">Submit</MudButton>
+        <MudButton Color="Color.Primary" Disabled="_isLoading" OnClick="Submit">Submit</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -61,7 +61,7 @@
     private async Task LoadData()
     {
         _isLoading = true;
-        var result = await _transactionService.GetCashTransactionById(Id);
+        var result = await _transactionService.GetCashTransactionByIdAsync(Id);
 
         if(!result.IsSuccess)
         {
@@ -89,7 +89,7 @@
         if (!_transactionForm.IsValid)
             return;
 
-        var result = await _transactionService.UpdateCashTransaction(updateCashTransaction);
+        var result = await _transactionService.UpdateCashTransactionAsync(updateCashTransaction);
 
 
         if (!result.IsSuccess)

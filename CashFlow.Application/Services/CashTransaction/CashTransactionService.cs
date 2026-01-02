@@ -15,9 +15,9 @@ internal class CashTransactionService : ICashTransactionService
         _repository = repository;
         _mapper = mapper;
     }
-    public async Task<Result<UpdateCashTransactionDto>> AddCashTransaction(CreateCashTransactionDto dto)
+    public async Task<Result<UpdateCashTransactionDto>> AddCashTransactionAsync(CreateCashTransactionDto dto)
     {
-        var cashTransaction = Domain.Entities.CashTransaction.Create(
+        var cashTransaction = Domain.Entities.CashTransaction.Create(dto.AccountId,
             dto.Amount,
             dto.Type,
             dto.Name,
@@ -30,14 +30,14 @@ internal class CashTransactionService : ICashTransactionService
             return Result<UpdateCashTransactionDto>.Failure(cashTransaction.ErrorMessage);
         }
 
-       var result = await _repository.AddCashTransaction(cashTransaction.Data);
+       var result = await _repository.AddCashTransactionAsync(cashTransaction.Data);
 
         return Result<UpdateCashTransactionDto>.Success(_mapper.Map<UpdateCashTransactionDto>(result));
     }
 
-    public async Task<Result<bool>> DeleteCashTransaction(long id)
+    public async Task<Result<bool>> DeleteCashTransactionAsync(long id)
     {
-        var exist = await _repository.DeleteCashTransaction(id);
+        var exist = await _repository.DeleteCashTransactionAsync(id);
 
         if (!exist)
         {
@@ -47,18 +47,18 @@ internal class CashTransactionService : ICashTransactionService
         return Result<bool>.Success(exist);
     }
 
-    public async Task<Result<IReadOnlyList<GetCashTransactionDto>>> GetAllCashTransactions()
+    public async Task<Result<IReadOnlyList<GetCashTransactionDto>>> GetAllCashTransactionsAsync()
     {
-        var transactions = await _repository.GetAllCashTransactions();
+        var transactions = await _repository.GetAllCashTransactionsAsync();
         
         var mappedTransactions = _mapper.Map<IReadOnlyList<GetCashTransactionDto>>(transactions);
 
         return Result<IReadOnlyList<GetCashTransactionDto>>.Success(mappedTransactions);
     }
 
-    public async Task<Result<GetCashTransactionDto>> GetCashTransactionById(long id)
+    public async Task<Result<GetCashTransactionDto>> GetCashTransactionByIdAsync(long id)
     {
-        var exist = await _repository.GetCashTransactionById(id);
+        var exist = await _repository.GetCashTransactionByIdAsync(id);
         if (exist == null)
         {
             return Result<GetCashTransactionDto>.Failure("Cash transaction not found.");
@@ -68,12 +68,12 @@ internal class CashTransactionService : ICashTransactionService
         return Result<GetCashTransactionDto>.Success(mappedTransaction);
     }
 
-    public async Task<Result<IReadOnlyList<CashFlowSliceDto>>> GetCashTransactionByRange(CashFlowFilterDto filter)
+    public async Task<Result<IReadOnlyList<CashFlowSliceDto>>> GetCashTransactionByRangeAsync(CashFlowFilterDto filter)
     {
         var from = filter.StartDate.Date;
         var to = filter.EndDate.Date.AddDays(1);
 
-        var transactions = await _repository.GetCashTransactionByRange(from, to);
+        var transactions = await _repository.GetCashTransactionByRangeAsync(from, to);
 
         var groupedTransactions = transactions.GroupBy(transactions => transactions.Type)
             .Select(group => new CashFlowSliceDto
@@ -86,12 +86,12 @@ internal class CashTransactionService : ICashTransactionService
         return Result<IReadOnlyList<CashFlowSliceDto>>.Success(groupedTransactions);
     }
 
-    public async Task<Result<IncomeExpenseReportDto>> GetIncomeExpenseReport(CashFlowFilterDto filter)
+    public async Task<Result<IncomeExpenseReportDto>> GetIncomeExpenseReportAsync(CashFlowFilterDto filter)
     {
         var from = filter.StartDate.Date;
         var to = filter.EndDate.Date.AddDays(1);
 
-        var transactions = await _repository.GetCashTransactionByRange(from, to);
+        var transactions = await _repository.GetCashTransactionByRangeAsync(from, to);
 
         var incomes = transactions
             .Where(x => x.Type == TransactionType.Income)
@@ -119,12 +119,12 @@ internal class CashTransactionService : ICashTransactionService
 
     }
 
-    public async Task<Result<SavingReportDto>> GetSavingReport(CashFlowFilterDto filter)
+    public async Task<Result<SavingReportDto>> GetSavingReportAsync(CashFlowFilterDto filter)
     {
         var from = filter.StartDate.Date;
         var to = filter.EndDate.Date.AddDays(1);
 
-        var transactions = await _repository.GetCashTransactionByRange(from, to);
+        var transactions = await _repository.GetCashTransactionByRangeAsync(from, to);
 
         var savings = transactions
             .Where(x => x.Type == TransactionType.Saving)
@@ -140,9 +140,12 @@ internal class CashTransactionService : ICashTransactionService
         return Result<SavingReportDto>.Success(new SavingReportDto { Savings = savings, TotalSavings = savings.Sum(x => x.Amount) });
     }
 
-    public async Task<Result<UpdateCashTransactionDto>> UpdateCashTransaction(UpdateCashTransactionDto dto)
+    public async Task<Result<UpdateCashTransactionDto>> UpdateCashTransactionAsync(UpdateCashTransactionDto dto)
     {
-        var exist = await _repository.GetCashTransactionById(dto.Id);
+        var exist = await _repository.GetCashTransactionByIdAsync(dto.Id);
+
+        if (exist == null)
+            return Result<UpdateCashTransactionDto>.Failure("Cash transaction not found.");
 
         var modifiedTransaction = exist.Modify(dto.Amount, dto.Type, dto.Name, dto.Description, dto.TransactionDate);
 
@@ -151,7 +154,7 @@ internal class CashTransactionService : ICashTransactionService
             return Result<UpdateCashTransactionDto>.Failure(modifiedTransaction.ErrorMessage);
         }
 
-        var updatedTransaction = await _repository.UpdateCashTransaction(modifiedTransaction.Data);
+        var updatedTransaction = await _repository.UpdateCashTransactionAsync(exist);
 
         return Result<UpdateCashTransactionDto>.Success(_mapper.Map<UpdateCashTransactionDto>(updatedTransaction));
     }

@@ -5,6 +5,8 @@ namespace CashFlow.Domain.Entities;
 
 public class CashTransaction : BaseEntity
 {
+    public long? AccountId { get; private set; }
+    public Account Account { get; private set; }
     public decimal Amount { get; private set; }
     public TransactionType Type { get; private set; }
     public string Description { get; private set; } = string.Empty;
@@ -12,7 +14,7 @@ public class CashTransaction : BaseEntity
     public DateTime? TransactionDate { get; private set; }
     public CashTransaction() { } // For EF Core
 
-    private CashTransaction(
+    private CashTransaction(long accountId,
         decimal amount,
         TransactionType type,
         string name,
@@ -26,6 +28,7 @@ public class CashTransaction : BaseEntity
         TransactionDate = transactionDate;
     }
     public static DomainResult<CashTransaction> Create(
+        long accountId,
         decimal amount,
         TransactionType type,
         string name,
@@ -37,7 +40,7 @@ public class CashTransaction : BaseEntity
         if (string.IsNullOrWhiteSpace(name))
             return DomainResult<CashTransaction>.Failure("Name cannot be null or empty.");
 
-        var transaction = new CashTransaction(
+        var transaction = new CashTransaction(accountId,
             amount,
             type,
             name,
@@ -47,7 +50,7 @@ public class CashTransaction : BaseEntity
         return DomainResult<CashTransaction>.Success(transaction);
     
     }
-    public DomainResult<CashTransaction> Modify(
+    public DomainResult Modify(
         decimal amount,
         TransactionType type,
         string name,
@@ -55,9 +58,9 @@ public class CashTransaction : BaseEntity
         DateTime? transactionDate)
     {
         if (amount <= 0)
-            return DomainResult<CashTransaction>.Failure("Amount must be greater than zero.");
+            return DomainResult.Failure("Amount must be greater than zero.");
         if (string.IsNullOrWhiteSpace(name))
-            return DomainResult<CashTransaction>.Failure("Name cannot be null or empty.");
+            return DomainResult.Failure("Name cannot be null or empty.");
 
         Amount = amount;
         Type = type;
@@ -65,6 +68,6 @@ public class CashTransaction : BaseEntity
         Description = description;
         TransactionDate = transactionDate;
         
-        return DomainResult<CashTransaction>.Success(this);
+        return DomainResult.Success();
     }
 }

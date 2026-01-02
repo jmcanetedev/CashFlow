@@ -3,7 +3,7 @@
 public class DomainResult
 {
     public bool IsSuccess { get; set; }
-    public string? ErrorMessage { get; set; }
+    public string ErrorMessage { get; set; }
 
     public static DomainResult Success()
     {
@@ -23,7 +23,7 @@ public class DomainResult
 }
 public class DomainResult<T> : DomainResult
 {
-    public T? Data { get; set; }
+    public T Data { get; set; }
     public static DomainResult<T> Success(T data)
     {
         return new DomainResult<T>

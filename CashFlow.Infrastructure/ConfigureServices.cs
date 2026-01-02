@@ -1,6 +1,7 @@
 ﻿using CashFlow.Application.Interfaces;
 using CashFlow.Infrastructure.Persistence;
-using CashFlow.Infrastructure.Persistence.Repositories;
+using CashFlow.Infrastructure.Persistence.Repositories.Account;
+using CashFlow.Infrastructure.Persistence.Repositories.CashTransaction;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +16,8 @@ public static class ConfigureServices
         {
             opt.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
         });
+        services.AddScoped<IAccountRepository, AccountRepository>();
         services.AddScoped<ICashTransactionRepository, CashTransactionRepository>();
+
     }
 }

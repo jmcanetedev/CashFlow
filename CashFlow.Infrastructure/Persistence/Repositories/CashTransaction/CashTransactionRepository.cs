@@ -1,9 +1,8 @@
-﻿using CashFlow.Application.Common;
-using CashFlow.Application.Interfaces;
+﻿using CashFlow.Application.Interfaces;
 using CashFlow.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace CashFlow.Infrastructure.Persistence.Repositories;
+namespace CashFlow.Infrastructure.Persistence.Repositories.CashTransaction;
 
 public class CashTransactionRepository : ICashTransactionRepository
 {
@@ -13,7 +12,7 @@ public class CashTransactionRepository : ICashTransactionRepository
         _context = context;
     }
 
-    public async Task<CashTransaction> AddCashTransaction(CashTransaction cashTransaction)
+    public async Task<Domain.Entities.CashTransaction> AddCashTransactionAsync(Domain.Entities.CashTransaction cashTransaction)
     {
         _context.Transactions.Add(cashTransaction);
         
@@ -22,28 +21,35 @@ public class CashTransactionRepository : ICashTransactionRepository
         return cashTransaction;
     }
 
-    public async Task<bool> DeleteCashTransaction(long id)
+    public async Task<bool> DeleteCashTransactionAsync(long id)
     {
         var exist = await _context.Transactions.FindAsync(id);
         if(exist == null)
             return false;
-        return true;
+
+        exist.DeletedAt = DateTime.UtcNow;
+
+        _context.Transactions.Update(exist);
+
+        var result =  await _context.SaveChangesAsync();
+
+        return result > 0;
     }
 
-    public async Task<IReadOnlyList<CashTransaction>> GetAllCashTransactions()
+    public async Task<IReadOnlyList<Domain.Entities.CashTransaction>> GetAllCashTransactionsAsync()
     {
         var transactions = await _context.Transactions.AsNoTracking().OrderByDescending(c=>c.Id).ToListAsync();
 
         return transactions;
     }
 
-    public async Task<CashTransaction> GetCashTransactionById(long id)
+    public async Task<Domain.Entities.CashTransaction> GetCashTransactionByIdAsync(long id)
     {
         var exist =  await _context.Transactions.AsNoTracking().FirstOrDefaultAsync(t=> t.Id == id);
         return exist;
     }
 
-    public async Task<IReadOnlyList<CashTransaction>> GetCashTransactionByRange(DateTime start, DateTime end)
+    public async Task<IReadOnlyList<Domain.Entities.CashTransaction>> GetCashTransactionByRangeAsync(DateTime start, DateTime end)
     {
        
 
@@ -55,7 +61,7 @@ public class CashTransactionRepository : ICashTransactionRepository
         return transactions;
     }
 
-    public async Task<CashTransaction> UpdateCashTransaction(CashTransaction cashTransaction)
+    public async Task<Domain.Entities.CashTransaction> UpdateCashTransactionAsync(Domain.Entities.CashTransaction cashTransaction)
     {
         var exist = await _context.Transactions.FindAsync(cashTransaction.Id);
 

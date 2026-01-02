@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using CashFlow.Application.DTOs.CashTransaction;
-using CashFlow.Domain.Entities;
 
 namespace CashFlow.Application.Mappings.CashTransaction;
 
