@@ -10,6 +10,6 @@ public interface ICashTransactionRepository
     Task<CashTransaction> UpdateCashTransactionAsync(CashTransaction cashTransaction);
     Task<bool> DeleteCashTransactionAsync(long id);
     Task<CashTransaction> GetCashTransactionByIdAsync(long id);
-    Task<IReadOnlyList<CashTransaction>> GetAllCashTransactionsAsync();
-    Task<IReadOnlyList<CashTransaction>> GetCashTransactionByRangeAsync(DateTime start, DateTime end);
+    Task<IReadOnlyList<CashTransaction>> GetAllCashTransactionsAsync(long accountId);
+    Task<IReadOnlyList<CashTransaction>> GetCashTransactionByRangeAsync(long accountId, DateTime start, DateTime end);
 }

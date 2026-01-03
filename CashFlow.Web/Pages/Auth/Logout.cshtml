@@ -1,0 +1,13 @@
+﻿@page "/logout"
+@model CashFlow.Web.Pages.Auth.LogoutModel
+
+<form method="post">
+    @Html.AntiForgeryToken()
+</form>
+
+@section Scripts
+{
+    <script>
+        document.forms[0].submit();
+    </script>
+}

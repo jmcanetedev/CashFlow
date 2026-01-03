@@ -1,4 +1,7 @@
-﻿@inherits LayoutComponentBase
+﻿@using CashFlow.Web.Security
+@inherits LayoutComponentBase
+@inject ICurrentUser CurrentUser
+@inject NavigationManager Nav
 @* Required *@
 <MudThemeProvider />
 <MudPopoverProvider />
@@ -11,6 +14,26 @@
     <MudAppBar Color="Color.Dark" Elevation="1" Fixed="true">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Primary" Edge="Edge.Start" OnClick="@ToggleDrawer" />
         CashFlow
+        <MudSpacer />
+        @if (CurrentUser.IsAuthenticated)
+        {
+            <MudMenu Color="Color.Primary"
+                     AriaLabel="Open user menu">
+                <ActivatorContent>
+                    <MudAvatar Color="Color.Primary" Variant="Variant.Outlined">@CurrentUser.Avatar</MudAvatar>
+                </ActivatorContent>
+                <ChildContent>
+                    <MudMenuItem Icon="@Icons.Material.Filled.VerifiedUser" Label="Profile" />
+                    <MudMenuItem OnClick="()=> OnAccountView()" Icon="@Icons.Material.Filled.AccountCircle" Label="My accounts" />
+                    <MudMenuItem OnClick="() => OnLogout()" Icon="@Icons.Material.Filled.Logout" Label="Logout" />
+                </ChildContent>
+            </MudMenu>
+
+        }
+        else
+        {
+            <MudIconButton Icon="@Icons.Custom.Brands.Microsoft" Color="Color.Inherit" />
+        }
     </MudAppBar>
     <MudDrawer Elevation="1" @bind-Open="@_drawerOpen" ClipMode="DrawerClipMode.Always" Variant="@DrawerVariant.Mini" OpenMiniOnHover="true" Breakpoint="Breakpoint.None">
         @* <MudDrawerHeader>
@@ -38,5 +61,13 @@
     private void ToggleDrawer()
     {
         _drawerOpen = !_drawerOpen;
+    }
+    private void OnAccountView()
+    {
+        Nav.NavigateTo("/accounts");
+    }
+    private void OnLogout()
+    {
+        Nav.NavigateTo("/logout", true);
     }
 }

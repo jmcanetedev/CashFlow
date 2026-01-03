@@ -10,5 +10,7 @@ public interface IAccountService
     Task<Result<GetAccountDto>> GetAccountByIdAsync(long accountId);
     Task<Result<bool>> DeleteAccountByIdAsync(long accountId);
     Task<Result<UpdateAccountDto>> UpdateAccount(UpdateAccountDto account);
-    Task<IReadOnlyList<GetAccountDto>> GetAllAccountsAsync();
+    Task<Result<IReadOnlyList<GetAccountDto>>> GetAllAccountsAsync();
+    Task<Result<IReadOnlyList<GetAccountDto>>> GetAccountByUserIdAsync(Guid userId);
+    Task<Result<long?>> ResolveDefaultAccountIdAsync(Guid userId);
 }

@@ -47,9 +47,9 @@ internal class CashTransactionService : ICashTransactionService
         return Result<bool>.Success(exist);
     }
 
-    public async Task<Result<IReadOnlyList<GetCashTransactionDto>>> GetAllCashTransactionsAsync()
+    public async Task<Result<IReadOnlyList<GetCashTransactionDto>>> GetAllCashTransactionsAsync(long accountId)
     {
-        var transactions = await _repository.GetAllCashTransactionsAsync();
+        var transactions = await _repository.GetAllCashTransactionsAsync(accountId);
         
         var mappedTransactions = _mapper.Map<IReadOnlyList<GetCashTransactionDto>>(transactions);
 
@@ -73,7 +73,7 @@ internal class CashTransactionService : ICashTransactionService
         var from = filter.StartDate.Date;
         var to = filter.EndDate.Date.AddDays(1);
 
-        var transactions = await _repository.GetCashTransactionByRangeAsync(from, to);
+        var transactions = await _repository.GetCashTransactionByRangeAsync(filter.CurrentAccountId, from, to);
 
         var groupedTransactions = transactions.GroupBy(transactions => transactions.Type)
             .Select(group => new CashFlowSliceDto
@@ -91,7 +91,7 @@ internal class CashTransactionService : ICashTransactionService
         var from = filter.StartDate.Date;
         var to = filter.EndDate.Date.AddDays(1);
 
-        var transactions = await _repository.GetCashTransactionByRangeAsync(from, to);
+        var transactions = await _repository.GetCashTransactionByRangeAsync(filter.CurrentAccountId, from, to);
 
         var incomes = transactions
             .Where(x => x.Type == TransactionType.Income)
@@ -124,7 +124,7 @@ internal class CashTransactionService : ICashTransactionService
         var from = filter.StartDate.Date;
         var to = filter.EndDate.Date.AddDays(1);
 
-        var transactions = await _repository.GetCashTransactionByRangeAsync(from, to);
+        var transactions = await _repository.GetCashTransactionByRangeAsync(filter.CurrentAccountId, from, to);
 
         var savings = transactions
             .Where(x => x.Type == TransactionType.Saving)

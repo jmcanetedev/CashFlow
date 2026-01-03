@@ -1,0 +1,86 @@
+﻿@page "/accounts"
+@using CashFlow.Application.DTOs.Account
+@using System.Globalization
+@using CashFlow.Web.Components.Pages.Account.Actions
+@using CashFlow.Web.Formatting
+@using CashFlow.Web.Security
+@rendermode InteractiveServer
+@inject IAccountService _accountService
+@inject IDialogService DialogService
+@inject ICurrentUser CurrentUser
+@attribute [Authorize]
+<h3>Accounts</h3>
+<h6><i>List of Accounts</i></h6>
+<MudButton OnClick="OpenAddDialog" Variant="Variant.Filled" Color="Color.Success" Class="mb-2" Size="Size.Medium" StartIcon="@Icons.Material.Filled.Add">Add Account</MudButton>
+<MudDataGrid T="GetAccountDto" Items="@_accounts" Filterable="true"
+             Hideable="true" Loading="_loading">
+    <NoRecordsContent>
+        <MudText Typo="Typo.subtitle1" Align="Align.Center">
+            No accounts found
+        </MudText>
+    </NoRecordsContent>
+    <Columns>
+        <PropertyColumn Property="x => x.Id" Title="ID" Sortable="false" Filterable="false" />
+        <PropertyColumn Property="x => x.Name" />
+        <PropertyColumn Property="x => x.AccountNumber" />
+        <PropertyColumn Property="x => x.AccountType" />
+        <TemplateColumn StickyRight="true">
+            <CellTemplate Context="item">
+                <MudIconButton Icon="@Icons.Material.Outlined.Edit" Size="@Size.Small" OnClick="() => OpenEditDialog(item.Item)" />
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="GetAccountDto" />
+    </PagerContent>
+</MudDataGrid>
+@code
+{
+    private IReadOnlyList<GetAccountDto> _accounts { get; set; } = new List<GetAccountDto>();
+    private bool _loading;
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAccounts();
+    }
+    private async Task LoadAccounts()
+    {
+        _loading = true;
+        var accountResult = await _accountService.GetAccountByUserIdAsync(CurrentUser.UserId);
+        if (accountResult.IsSuccess && accountResult.Data is not null)
+        {
+            _accounts = accountResult.Data;
+        }
+        _loading = false;
+    }
+    private async Task OpenAddDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true, MaxWidth = MaxWidth.Large };
+
+        var accountDialog = await DialogService.ShowAsync<AddAccount>("Add Account", options);
+
+        var result = await accountDialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        await OnInitializedAsync();
+
+    }
+    private async Task OpenEditDialog(GetAccountDto accountDto)
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true, MaxWidth = MaxWidth.Large };
+        var dialogParameter = new DialogParameters
+        {
+            ["Id"] = accountDto.Id
+        };
+
+        var transactionDialog = await DialogService.ShowAsync<EditAccount>("Edit Account", dialogParameter, options);
+
+        var result = await transactionDialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        await OnInitializedAsync();
+    }
+}

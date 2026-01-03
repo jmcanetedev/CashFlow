@@ -36,9 +36,12 @@ public class CashTransactionRepository : ICashTransactionRepository
         return result > 0;
     }
 
-    public async Task<IReadOnlyList<Domain.Entities.CashTransaction>> GetAllCashTransactionsAsync()
+    public async Task<IReadOnlyList<Domain.Entities.CashTransaction>> GetAllCashTransactionsAsync(long accountId)
     {
-        var transactions = await _context.Transactions.AsNoTracking().OrderByDescending(c=>c.Id).ToListAsync();
+        var transactions = await _context.Transactions.AsNoTracking()
+            .Where(t => t.AccountId == accountId)
+            .OrderByDescending(c => c.Id)
+            .ToListAsync();
 
         return transactions;
     }
@@ -49,13 +52,13 @@ public class CashTransactionRepository : ICashTransactionRepository
         return exist;
     }
 
-    public async Task<IReadOnlyList<Domain.Entities.CashTransaction>> GetCashTransactionByRangeAsync(DateTime start, DateTime end)
+    public async Task<IReadOnlyList<Domain.Entities.CashTransaction>> GetCashTransactionByRangeAsync(long accountId, DateTime start, DateTime end)
     {
        
 
         var transactions =  await _context.Transactions
             .AsNoTracking()
-            .Where(t => t.TransactionDate >= start && t.TransactionDate < end).OrderByDescending(c => c.Id)
+            .Where(t => t.TransactionDate >= start && t.TransactionDate < end && t.AccountId == accountId).OrderByDescending(c => c.Id)
             .ToListAsync();
 
         return transactions;

@@ -9,4 +9,5 @@ public interface IAccountRepository
     Task<bool> DeleteAccountByIdAsync(long accountId);
     Task<Account> UpdateAccountAsync(Account account);
     Task<IReadOnlyList<Account>> GetAllAccountsAsync();
+    Task<IReadOnlyList<Account>> GetAccountByUserIdAsync(Guid userId);
 }

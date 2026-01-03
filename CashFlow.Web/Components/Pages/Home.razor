@@ -1,8 +1,10 @@
 ﻿@page "/"
 @rendermode InteractiveServer
+@using CashFlow.Application.DTOs.Account
 @using CashFlow.Web.Formatting
 @using CashFlow.Web.Security
 @inject ICashTransactionService _transactionService
+@inject IAccountService _accountService
 @inject AuthenticationStateProvider AuthState
 @inject ICurrentUser CurrentUser
 @attribute [Authorize]
@@ -144,6 +146,7 @@ else
 }
 @code
 {
+    private IReadOnlyList<GetAccountDto> _accounts = [];
     private IReadOnlyList<CashFlowSliceDto> _summary = [];
     private string[] _labels = [];
     private double[] _data = [];
@@ -154,14 +157,39 @@ else
        DateTime.Today.AddMonths(-1),
        DateTime.Today);
     private bool _isLoading = true;
-
+    private CashFlowFilterDto _cashFlowFilterDto = new();
     protected override async Task OnInitializedAsync()
     {
+        await LoadAccounts();
         await LoadReport();
+    }
+    private async Task LoadAccounts()
+    {
+        _cashFlowFilterDto = new CashFlowFilterDto
+        {
+            StartDate = _range.Start.GetValueOrDefault(),
+            EndDate = _range.End.GetValueOrDefault()
+        };
+
+        var accountsResult =
+            await _accountService.GetAccountByUserIdAsync(CurrentUser.UserId);
+
+        if (!accountsResult.IsSuccess)
+            return;
+
+        _accounts = accountsResult.Data;
+
+        var defaultAccountId =
+            await _accountService.ResolveDefaultAccountIdAsync(CurrentUser.UserId);
+
+        if (defaultAccountId.IsSuccess)
+            CurrentUser.SetCurrentAccountId(defaultAccountId.Data.GetValueOrDefault());
+
+        _cashFlowFilterDto.CurrentAccountId = CurrentUser.CurrentAccountId;
     }
     private async Task LoadPieData()
     {
-        var result = await _transactionService.GetCashTransactionByRangeAsync(new CashFlowFilterDto { StartDate = _range.Start.GetValueOrDefault(), EndDate = _range.End.GetValueOrDefault() });
+        var result = await _transactionService.GetCashTransactionByRangeAsync(_cashFlowFilterDto);
 
         if (result.IsSuccess)
         {
@@ -171,7 +199,7 @@ else
     }
     private async Task LoadSavingReport()
     {
-        var result = await _transactionService.GetSavingReportAsync(new CashFlowFilterDto { StartDate = _range.Start.GetValueOrDefault(), EndDate = _range.End.GetValueOrDefault() });
+        var result = await _transactionService.GetSavingReportAsync(_cashFlowFilterDto);
         if (!result.IsSuccess)
             return;
 
@@ -181,7 +209,7 @@ else
     private async Task LoadReport()
     {
         _isLoading = true;
-        var result = await _transactionService.GetIncomeExpenseReportAsync(new CashFlowFilterDto { StartDate = _range.Start.GetValueOrDefault(), EndDate = _range.End.GetValueOrDefault() });
+        var result = await _transactionService.GetIncomeExpenseReportAsync(_cashFlowFilterDto);
         if (!result.IsSuccess)
             return;
 

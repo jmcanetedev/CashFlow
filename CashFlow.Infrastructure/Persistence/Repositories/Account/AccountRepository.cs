@@ -41,6 +41,12 @@ public class AccountRepository : IAccountRepository
         return exist;
     }
 
+    public async Task<IReadOnlyList<Domain.Entities.Account>> GetAccountByUserIdAsync(Guid userId)
+    {
+        var userAccounts = await _context.Accounts.AsNoTracking().Where(c=>c.UserId == userId).OrderByDescending(c=>c.Id).ToListAsync();
+        return userAccounts;
+    }
+
     public async Task<IReadOnlyList<Domain.Entities.Account>> GetAllAccountsAsync()
     {
        var accounts = await _context.Accounts.AsNoTracking().OrderByDescending(a=>a.Id).ToListAsync();

@@ -16,7 +16,7 @@ public class AccountService : IAccountService
     }
     public async Task<Result<UpdateAccountDto>> AddAccountAsync(CreateAccountDto account)
     {
-        var accountResult = Domain.Entities.Account.Create(account.Name, account.UserId, account.AccountType);
+        var accountResult = Domain.Entities.Account.Create(account.Name, account.UserId, account.AccountType, account.IsDefault);
 
         if (!accountResult.IsSuccess)
             return Result<UpdateAccountDto>.Failure(accountResult.ErrorMessage);
@@ -46,13 +46,16 @@ public class AccountService : IAccountService
         return Result<GetAccountDto>.Success(mappedAccount);
     }
 
-    public async Task<IReadOnlyList<GetAccountDto>> GetAllAccountsAsync()
+    public async Task<Result<IReadOnlyList<GetAccountDto>>> GetAccountByUserIdAsync(Guid userId)
+    {
+        var accounts =  await _accountRepository.GetAccountByUserIdAsync(userId);
+        return Result<IReadOnlyList<GetAccountDto>>.Success(_mapper.Map<IReadOnlyList<GetAccountDto>>(accounts));
+    }
+
+    public async Task<Result<IReadOnlyList<GetAccountDto>>> GetAllAccountsAsync()
     {
         var accounts =  await _accountRepository.GetAllAccountsAsync();
-
-        var mappedAccounts = _mapper.Map<IReadOnlyList<GetAccountDto>>(accounts);
-
-        return mappedAccounts;
+        return Result<IReadOnlyList<GetAccountDto>>.Success(_mapper.Map<IReadOnlyList<GetAccountDto>>(accounts));
     }
 
     public async Task<Result<UpdateAccountDto>> UpdateAccount(UpdateAccountDto account)
@@ -61,7 +64,7 @@ public class AccountService : IAccountService
         if (exist == null)
             return Result<UpdateAccountDto>.Failure("Account not found");
 
-        var accountResult = exist.Modify(account.Name);
+        var accountResult = exist.Modify(account.Name, account.IsDefault);
 
         if(!accountResult.IsSuccess)
             return Result<UpdateAccountDto>.Failure(accountResult.ErrorMessage);
@@ -70,4 +73,24 @@ public class AccountService : IAccountService
 
         return Result<UpdateAccountDto>.Success(_mapper.Map<UpdateAccountDto>(exist));
     }
+    public async Task<Result<long?>> ResolveDefaultAccountIdAsync(Guid userId)
+    {
+        var accounts = await _accountRepository.GetAccountByUserIdAsync(userId);
+
+        if (accounts.Count == 0)
+            return null;
+
+        // Rule 1: Explicit default
+        var defaultAccount = accounts.FirstOrDefault(a => a.IsDefault);
+        if (defaultAccount is not null)
+            return Result<long?>.Success(defaultAccount.Id);
+
+        // Rule 2: Single account fallback
+        if (accounts.Count == 1)
+            return Result<long?>.Success(accounts[0].Id);
+
+        // Rule 3: No default → let UI ask user
+        return Result<long?>.Failure("No Default Account");
+    }
+
 }

@@ -1,6 +1,8 @@
 ﻿@using CashFlow.Domain.Enums;
 @using CashFlow.Web.Interfaces
+@using CashFlow.Web.Security
 @inject ICashTransactionService _transactionService
+@inject ICurrentUser CurrentUser
 @inject INotificationService _notificationService
 <MudDialog>
     <DialogContent>
@@ -69,7 +71,7 @@
             MudDialog.Cancel();
             return;
         }
-        
+
         updateCashTransaction = new UpdateCashTransactionDto
         {
             Id = result.Data.Id,
@@ -81,7 +83,10 @@
         };
         _isLoading = false;
     }
-
+    protected override void OnInitialized()
+    {
+        updateCashTransaction.AccountId = CurrentUser.CurrentAccountId;
+    }
     private async Task Submit()
     {
         await _transactionForm.Validate();

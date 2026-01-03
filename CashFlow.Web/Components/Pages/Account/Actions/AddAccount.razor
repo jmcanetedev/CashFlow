@@ -1,7 +1,8 @@
-﻿@using CashFlow.Domain.Enums;
+﻿@using CashFlow.Application.DTOs.Account
+@using CashFlow.Domain.Enums;
 @using CashFlow.Web.Interfaces
 @using CashFlow.Web.Security
-@inject ICashTransactionService _transactionService
+@inject IAccountService _accountService
 @inject ICurrentUser CurrentUser
 @inject INotificationService _notificationService
 <MudDialog>
@@ -9,16 +10,15 @@
         <MudGrid>
             <MudItem xs="12" sm="7">
                 <MudPaper Class="pa-4">
-                    <MudForm @ref="_transactionForm" Model="_createCashTransaction" @bind-IsValid="@success" @bind-Errors="@errors">
-                        <MudTextField T="string" @bind-Value="@_createCashTransaction.Name" Label="Name" Required="true" RequiredError="Name is required" />
-                        <MudTextField T="decimal" @bind-Value="@_createCashTransaction.Amount" Label="Amount" Required="true" RequiredError="Amount is required" />
-                        <MudSelect @bind-Value="@_createCashTransaction.Type" Label="Transaction Type">
-                            @foreach (TransactionType transactionType in Enum.GetValues(typeof(TransactionType)))
+                    <MudForm @ref="_accountForm" Model="_createAccount" @bind-IsValid="@success" @bind-Errors="@errors">
+                        <MudTextField T="string" @bind-Value="@_createAccount.Name" Label="Name" Required="true" RequiredError="Name is required" />
+                        <MudSelect @bind-Value="@_createAccount.AccountType" Label="Account Type Type">
+                            @foreach (AccountType accountType in Enum.GetValues(typeof(AccountType)))
                             {
-                                <MudSelectItem Value="@transactionType">@transactionType</MudSelectItem>
+                                <MudSelectItem Value="@accountType">@accountType</MudSelectItem>
                             }
                         </MudSelect>
-                        <MudTextField T="string" Label="Description" Variant="Variant.Outlined" @bind-Value="@_createCashTransaction.Description" Lines="6" />
+                        
                     </MudForm>
                 </MudPaper>
             </MudItem>
@@ -39,39 +39,40 @@
     </DialogActions>
 </MudDialog>
 
-@code 
+@code
 {
     private bool success;
     private string[] errors = { };
-    private MudForm _transactionForm;
+    private MudForm _accountForm;
 
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; }
 
     private void Cancel() => MudDialog.Cancel();
 
-    private CreateCashTransactionDto _createCashTransaction = new();
+    private CreateAccountDto _createAccount = new();
 
     protected override void OnInitialized()
     {
-        _createCashTransaction.AccountId = CurrentUser.CurrentAccountId;
+        _createAccount.UserId = CurrentUser.UserId;
     }
 
     private async Task Submit()
     {
-        await _transactionForm.Validate();
+        await _accountForm.Validate();
 
-        if (!_transactionForm.IsValid)
+        if (!_accountForm.IsValid)
             return;
 
-        var result = await _transactionService.AddCashTransactionAsync(_createCashTransaction);
+        var result = await _accountService.AddAccountAsync(_createAccount);
 
-        if (!result.IsSuccess){
+        if (!result.IsSuccess)
+        {
             _notificationService.Error(result.ErrorMessage);
             return;
         }
 
-        _notificationService.Success("Transaction successfully added.");
+        _notificationService.Success("Account successfully added.");
 
         MudDialog.Close(true);
     }

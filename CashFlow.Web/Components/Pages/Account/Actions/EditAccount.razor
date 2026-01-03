@@ -1,0 +1,96 @@
+﻿@using CashFlow.Application.DTOs.Account
+@using CashFlow.Domain.Enums;
+@using CashFlow.Web.Interfaces
+@inject IAccountService _accountService
+@inject INotificationService _notificationService
+<MudDialog>
+    <DialogContent>
+        <MudGrid>
+            <MudItem xs="12" sm="7">
+                <MudPaper Class="pa-4">
+                    <MudForm @ref="_accountForm" Model="_updateAccount" @bind-IsValid="@success" @bind-Errors="@errors">
+                        <MudTextField T="string" @bind-Value="@_updateAccount.Name" Label="Name" Required="true" RequiredError="Name is required" />
+                    </MudForm>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" sm="5">
+                <MudPaper Class="pa-4 mud-height-full">
+                    <MudText Typo="Typo.subtitle2">@($"Errors ({errors.Length})")</MudText>
+                    @foreach (var error in errors)
+                    {
+                        <MudText Color="@Color.Error">@error</MudText>
+                    }
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" Disabled="_isLoading" OnClick="Submit">Submit</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code
+{
+    private bool success;
+    private string[] errors = { };
+    private MudForm _accountForm;
+    private bool _isLoading = true;
+
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }
+    [Parameter]
+    public long Id { get; set; }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private UpdateAccountDto _updateAccount = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        _isLoading = true;
+        var result = await _accountService.GetAccountByIdAsync(Id);
+
+        if (!result.IsSuccess)
+        {
+            _notificationService.Error(result.ErrorMessage);
+            MudDialog.Cancel();
+            return;
+        }
+
+        _updateAccount = new UpdateAccountDto
+        {
+            Id = result.Data.Id,
+            Name = result.Data.Name
+        };
+        _isLoading = false;
+    }
+
+    private async Task Submit()
+    {
+        await _accountForm.Validate();
+
+        if (!_accountForm.IsValid)
+            return;
+
+        var result = await _accountService.UpdateAccount(_updateAccount);
+
+
+        if (!result.IsSuccess)
+        {
+            _notificationService.Error(result.ErrorMessage);
+            return;
+        }
+
+        _notificationService.Success("Account successfully updated.");
+
+        MudDialog.Close(true);
+    }
+
+
+}

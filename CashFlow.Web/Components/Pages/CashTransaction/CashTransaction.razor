@@ -2,9 +2,11 @@
 @using CashFlow.Web.Components.Pages.CashTransaction.Actions
 @using System.Globalization
 @using CashFlow.Web.Formatting
+@using CashFlow.Web.Security
 @rendermode InteractiveServer
 @inject ICashTransactionService _transactionService
 @inject IDialogService DialogService
+@inject ICurrentUser CurrentUser
 @attribute [Authorize]
 <h3>Transactions</h3>
 <h6><i>List of Transactions Incoming/Expense</i></h6>
@@ -43,7 +45,7 @@
     protected override async Task OnInitializedAsync()
     {
         _loading = true;
-        var _transactionResult = await _transactionService.GetAllCashTransactionsAsync();
+        var _transactionResult = await _transactionService.GetAllCashTransactionsAsync(CurrentUser.CurrentAccountId);
         if (_transactionResult.IsSuccess && _transactionResult.Data is not null)
         {
             _transactions = _transactionResult.Data;
