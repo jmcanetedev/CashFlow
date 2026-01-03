@@ -1,5 +1,4 @@
 ﻿using CashFlow.Application.Interfaces;
-using CashFlow.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace CashFlow.Infrastructure.Persistence.Repositories.CashTransaction;

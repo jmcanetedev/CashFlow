@@ -6,8 +6,6 @@ public sealed class CurrentUser : ICurrentUser
 {
     public Guid UserId { get; private set; }
     public long CurrentAccountId { get; private set; }
-
-
     public string Avatar { get; private set; }
     public CurrentUser(IHttpContextAccessor accessor)
     {
@@ -18,7 +16,8 @@ public sealed class CurrentUser : ICurrentUser
             ? Guid.Empty
             : Guid.Parse(id);
         var name = accessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Name);
-        Avatar = name.Length > 0 ? name[0].ToString().ToUpper() : "";
+
+        Avatar = name.Length > 0 ? name[0].ToString().ToUpper() : "U";
     }
     public bool IsAuthenticated => UserId != Guid.Empty;
 

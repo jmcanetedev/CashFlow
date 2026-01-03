@@ -1,6 +1,4 @@
-﻿using CashFlow.Application.Common;
-using CashFlow.Application.DTOs.CashTransaction;
-using CashFlow.Domain.Entities;
+﻿using CashFlow.Domain.Entities;
 
 namespace CashFlow.Application.Interfaces;
 
