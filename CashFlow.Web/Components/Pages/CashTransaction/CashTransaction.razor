@@ -21,7 +21,7 @@
     <Columns>
         <PropertyColumn Property="x => x.Id" Title="ID" Sortable="false" Filterable="false" />
         <PropertyColumn Property="x => x.Name" />
-        <PropertyColumn Property="x => x.TransactionDate" />
+        <PropertyColumn Property="x => x.TransactionDate.Value.ToLocalTime()" />
         <PropertyColumn Property="x => x.Type" />
         <PropertyColumn Property="x => x.Amount" Title="Amount">
             <CellTemplate Context="item">

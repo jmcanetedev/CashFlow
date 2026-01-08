@@ -21,6 +21,7 @@ public class CashTransaction : BaseEntity
         string description,
         DateTime? transactionDate)
     {
+        AccountId = accountId;
         Amount = amount;
         Type = type;
         Name = name;

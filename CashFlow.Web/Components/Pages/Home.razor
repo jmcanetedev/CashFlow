@@ -57,7 +57,7 @@ else
                         <MudTh>Amount</MudTh>
                     </HeaderContent>
                     <RowTemplate>
-                        <MudTd>@context.TransactionDate.ToShortDateString()</MudTd>
+                        <MudTd>@context.TransactionDate.ToLocalTime()</MudTd>
                         <MudTd>@context.Name</MudTd>
                         <MudTd>
                             @CurrencyFormatter.ToPhp(context.Amount)
@@ -83,7 +83,7 @@ else
                         <MudTh>Amount</MudTh>
                     </HeaderContent>
                     <RowTemplate>
-                        <MudTd>@context.TransactionDate.ToShortDateString()</MudTd>
+                        <MudTd>@context.TransactionDate.ToLocalTime()</MudTd>
                         <MudTd>@context.Name</MudTd>
                         <MudTd>
                             @CurrencyFormatter.ToPhp(context.Amount)
@@ -128,7 +128,7 @@ else
                         <MudTh>Amount</MudTh>
                     </HeaderContent>
                     <RowTemplate>
-                        <MudTd>@context.TransactionDate.ToShortDateString()</MudTd>
+                        <MudTd>@context.TransactionDate.ToLocalTime()</MudTd>
                         <MudTd>@context.Name</MudTd>
                         <MudTd>
                             @CurrencyFormatter.ToPhp(context.Amount)
